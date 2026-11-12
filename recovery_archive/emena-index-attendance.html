@@ -1,0 +1,1302 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emena School Management System</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6fb;color:#1e293b}
+.layout{display:flex;min-height:100vh}
+aside{width:245px;background:#142b4a;color:white;padding:24px 16px;flex-shrink:0}
+.brand{font-size:21px;font-weight:bold;margin-bottom:8px}
+.subtitle{color:#b9c9df;font-size:12px;margin-bottom:30px}
+nav a{display:block;padding:13px 12px;margin:5px 0;color:#dce7f5;text-decoration:none;border-radius:7px;cursor:pointer}
+nav a:hover,nav a.active{background:#28496f;color:white}
+main{flex:1;min-width:0;padding:28px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:28px}
+h1{font-size:25px;margin:0 0 7px}
+h2{font-size:18px;margin-top:0}
+.muted,.status{color:#64748b;font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.card,.panel{background:white;border-radius:12px;padding:22px;box-shadow:0 2px 8px #172b4d0a}
+.card-label{color:#64748b;font-size:14px}
+.number{font-size:30px;font-weight:bold;margin-top:12px}
+.panel{margin-top:24px}
+button{background:#1763d1;color:white;border:0;padding:11px 16px;border-radius:7px;cursor:pointer}
+button:hover{background:#124da6}
+button.secondary{background:#475569}
+button.danger{background:#b42318}
+button:disabled{opacity:.55;cursor:not-allowed}
+input,select{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:7px;font:inherit;background:white}
+label{display:block;font-size:13px;font-weight:bold;margin-bottom:6px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field{min-width:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.toolbar{display:flex;gap:12px;align-items:center;margin-top:20px}
+.toolbar input{max-width:420px}
+.table-wrap{overflow-x:auto;margin-top:16px}
+table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:14px}
+th,td{text-align:left;padding:13px 12px;border-bottom:1px solid #e2e8f0}
+th{background:#f8fafc;color:#475569}
+td .actions{margin:0}
+td button{padding:8px 10px}
+.notice{margin-top:15px;padding:12px;border-radius:7px;background:#eff6ff;color:#1d4ed8}
+.notice.error{background:#fef2f2;color:#b42318}
+.notice:empty{display:none}
+.empty{padding:25px 0;color:#64748b;text-align:center}
+[hidden]{display:none!important}
+@media(max-width:950px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){
+.layout{display:block}aside{width:100%}
+nav{display:flex;flex-wrap:wrap;gap:4px}
+nav a{padding:9px}main{padding:18px}
+.cards{gap:10px}.card{padding:15px}.number{font-size:24px}
+header{align-items:flex-start}.form-grid{grid-template-columns:1fr}
+.toolbar{align-items:stretch;flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand">EMENA SCHOOL</div>
+  <div class="subtitle">Management System</div>
+  <nav>
+    <a class="active" href="#dashboard" data-page="Dashboard">Dashboard</a>
+    <a href="#students" data-page="Students">Students</a>
+    <a href="#teachers" data-page="Teachers & Staff">Teachers & Staff</a>
+    <a href="#classes" data-page="Classes & Subjects">Classes & Subjects</a>
+    <a href="#attendance" data-page="Attendance">Attendance</a>
+    <a href="#fees" data-page="Fees & Payments">Fees & Payments</a>
+    <a href="#exams" data-page="Examinations">Examinations</a>
+    <a href="#reports" data-page="Reports">Reports</a>
+    <a href="#settings" data-page="Settings">Settings</a>
+  </nav>
+</aside>
+
+<main>
+<header>
+  <div>
+    <h1 id="page-title">Dashboard</h1>
+    <div class="muted">Welcome to Emena School Management System</div>
+  </div>
+  <span class="status">Local development</span>
+</header>
+
+<section id="dashboard-page">
+  <div class="cards">
+    <div class="card"><div class="card-label">Total Students</div><div class="number" id="student-count">0</div></div>
+    <div class="card"><div class="card-label">Teachers & Staff</div><div class="number" id="teacher-count">0</div></div>
+    <div class="card"><div class="card-label">Classes</div><div class="number">0</div></div>
+    <div class="card"><div class="card-label">Outstanding Fees</div><div class="number">GH₵0.00</div></div>
+  </div>
+  <div class="panel">
+    <h2>Quick Actions</h2>
+    <p class="muted">Start managing your school's records.</p>
+    <button id="quick-students">Manage Students</button>
+  </div>
+  <div class="panel">
+    <h2>Recent Activities</h2>
+    <div class="empty">Activity tracking will be added in a later module.</div>
+  </div>
+</section>
+
+<section id="module-page" hidden>
+  <div id="placeholder" class="panel">
+    <h2 id="module-title"></h2>
+    <p class="muted" id="module-description"></p>
+    <div class="empty">This module's functionality will be implemented next.</div>
+  </div>
+
+
+  <div id="attendance-page" hidden>
+    <div class="panel">
+      <h2>Take Student Attendance</h2>
+      <p class="muted">Choose a date and class, mark each student's status, then save attendance.</p>
+      <div class="form-grid">
+        <div class="field">
+          <label for="attendance-date">Attendance Date *</label>
+          <input id="attendance-date" type="date" required>
+        </div>
+        <div class="field">
+          <label for="attendance-class">Class</label>
+          <select id="attendance-class">
+            <option value="">All classes</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="attendance-load-button" type="button">Load Students</button>
+        <button id="attendance-mark-present-button" class="secondary" type="button">Mark All Present</button>
+      </div>
+      <div id="attendance-message" class="notice" role="status" aria-live="polite"></div>
+    </div>
+    <div class="panel">
+      <div class="toolbar" style="justify-content:space-between">
+        <h2 style="margin:0">Attendance Register</h2>
+        <span id="attendance-record-count" class="muted">0 students</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Admission No.</th><th>Student Name</th><th>Class</th><th>Status</th><th>Remarks</th></tr>
+          </thead>
+          <tbody id="attendance-table">
+            <tr><td colspan="5">Choose a date and load students.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <button id="attendance-save-button" type="button">Save Attendance</button>
+      </div>
+      <p class="muted">Choose Present, Absent, or Late for each student. Existing attendance for the selected date will be loaded for editing.</p>
+    </div>
+  </div>
+
+  <div id="students-page" hidden>
+    <div class="panel">
+      <h2 id="form-heading">Register New Student</h2>
+      <p class="muted">Enter the student's information below.</p>
+      <form id="student-form">
+        <div class="form-grid">
+          <div class="field">
+            <label for="student_id">Student ID *</label>
+            <input id="student_id" name="student_id" maxlength="50" required>
+          </div>
+          <div class="field">
+            <label for="first_name">First Name *</label>
+            <input id="first_name" name="first_name" maxlength="100" required>
+          </div>
+          <div class="field">
+            <label for="last_name">Last Name *</label>
+            <input id="last_name" name="last_name" maxlength="100" required>
+          </div>
+          <div class="field">
+            <label for="gender">Gender *</label>
+            <select id="gender" name="gender" required>
+              <option value="">Select gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="date_of_birth">Date of Birth</label>
+            <input id="date_of_birth" name="date_of_birth" type="date">
+          </div>
+          <div class="field">
+            <label for="class_name">Class *</label>
+            <input id="class_name" name="class_name" maxlength="100" placeholder="e.g. Basic 6" required>
+          </div>
+          <div class="field">
+            <label for="guardian_name">Parent/Guardian Name *</label>
+            <input id="guardian_name" name="guardian_name" maxlength="150" required>
+          </div>
+          <div class="field">
+            <label for="guardian_phone">Parent/Guardian Phone *</label>
+            <input id="guardian_phone" name="guardian_phone" type="tel" maxlength="30" required>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="save-button" type="submit">Register Student</button>
+          <button id="cancel-edit" class="secondary" type="button" hidden>Cancel Edit</button>
+        </div>
+        <div id="form-message" class="notice" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>Student Records</h2>
+      <div class="toolbar">
+        <input id="student-search" type="search" placeholder="Search ID, name or class..." aria-label="Search students">
+        <button id="search-button" type="button">Search</button>
+        <button id="refresh-button" class="secondary" type="button">Refresh</button>
+      </div>
+      <div id="list-message" class="notice" role="status" aria-live="polite"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Student ID</th><th>Name</th><th>Gender</th>
+              <th>Class</th><th>Guardian</th><th>Phone</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="student-table">
+            <tr><td colspan="7">Loading student records...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted" id="record-count">0 students</p>
+    </div>
+  </div>
+
+  <div id="teachers-page" hidden>
+    <div class="panel">
+      <h2 id="teacher-form-heading">Register New Teacher / Staff</h2>
+      <p class="muted">Enter the teacher or staff member's information below.</p>
+      <form id="teacher-form">
+        <div class="form-grid">
+          <div class="field">
+            <label for="staff_id">Staff ID *</label>
+            <input id="staff_id" name="staff_id" maxlength="50" required>
+          </div>
+          <div class="field">
+            <label for="teacher_first_name">First Name *</label>
+            <input id="teacher_first_name" name="first_name" maxlength="100" required>
+          </div>
+          <div class="field">
+            <label for="teacher_last_name">Last Name *</label>
+            <input id="teacher_last_name" name="last_name" maxlength="100" required>
+          </div>
+          <div class="field">
+            <label for="teacher_gender">Gender *</label>
+            <select id="teacher_gender" name="gender" required>
+              <option value="">Select gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="teacher_phone">Phone *</label>
+            <input id="teacher_phone" name="phone" type="tel" maxlength="30" required>
+          </div>
+          <div class="field">
+            <label for="teacher_email">Email</label>
+            <input id="teacher_email" name="email" type="email" maxlength="150">
+          </div>
+          <div class="field">
+            <label for="teacher_subject">Subject / Role *</label>
+            <input id="teacher_subject" name="subject" maxlength="150" placeholder="e.g. Mathematics" required>
+          </div>
+          <div class="field">
+            <label for="teacher_qualification">Qualification</label>
+            <input id="teacher_qualification" name="qualification" maxlength="150" placeholder="e.g. B.Ed.">
+          </div>
+        </div>
+        <div class="actions">
+          <button id="teacher-save-button" type="submit">Register Teacher</button>
+          <button id="teacher-cancel-edit" class="secondary" type="button" hidden>Cancel Edit</button>
+        </div>
+        <div id="teacher-form-message" class="notice" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>Teacher & Staff Records</h2>
+      <div class="toolbar">
+        <input id="teacher-search" type="search" placeholder="Search staff ID, name or subject..." aria-label="Search teachers">
+        <button id="teacher-search-button" type="button">Search</button>
+        <button id="teacher-refresh-button" class="secondary" type="button">Refresh</button>
+      </div>
+      <div id="teacher-list-message" class="notice" role="status" aria-live="polite"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Staff ID</th><th>Name</th><th>Gender</th>
+              <th>Phone</th><th>Email</th><th>Subject / Role</th><th>Qualification</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="teacher-table">
+            <tr><td colspan="8">Loading teacher records...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted" id="teacher-record-count">0 teachers / staff</p>
+    </div>
+  </div>
+
+  <div id="classes-page" hidden>
+    <div class="panel">
+      <h2 id="class-form-heading">Add New Class</h2>
+      <p class="muted">Create a class and optionally assign a class teacher.</p>
+      <form id="class-form">
+        <div class="form-grid">
+          <div class="field">
+            <label for="class-record-name">Class Name *</label>
+            <input id="class-record-name" name="class_name" maxlength="100" placeholder="e.g. Basic 6" required>
+          </div>
+          <div class="field">
+            <label for="class-level">Level *</label>
+            <input id="class-level" name="level" maxlength="100" placeholder="e.g. Primary" required>
+          </div>
+          <div class="field">
+            <label for="class-teacher">Class Teacher</label>
+            <select id="class-teacher" name="class_teacher_id">
+              <option value="">No class teacher assigned</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="class-save-button" type="submit">Save Class</button>
+          <button id="class-cancel-edit" class="secondary" type="button" hidden>Cancel Edit</button>
+        </div>
+        <div id="class-form-message" class="notice" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+    <div class="panel">
+      <h2>Class Records</h2>
+      <div class="toolbar">
+        <input id="class-search" type="search" placeholder="Search class name or level..." aria-label="Search classes">
+        <button id="class-search-button" type="button">Search</button>
+        <button id="class-refresh-button" class="secondary" type="button">Refresh</button>
+      </div>
+      <div id="class-list-message" class="notice" role="status" aria-live="polite"></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Class Name</th><th>Level</th><th>Class Teacher</th><th>Actions</th></tr></thead>
+        <tbody id="class-table"><tr><td colspan="4">Loading class records...</td></tr></tbody>
+      </table></div>
+      <p class="muted" id="class-record-count">0 classes</p>
+    </div>
+  </div>
+
+  <div id="subjects-page" hidden>
+    <div class="panel">
+      <h2 id="subject-form-heading">Add New Subject</h2>
+      <p class="muted">Enter a subject name, an optional code, and a description.</p>
+      <form id="subject-form">
+        <div class="form-grid">
+          <div class="field">
+            <label for="subject-name">Subject Name *</label>
+            <input id="subject-name" name="subject_name" maxlength="150" placeholder="e.g. Mathematics" required>
+          </div>
+          <div class="field">
+            <label for="subject-code">Subject Code</label>
+            <input id="subject-code" name="subject_code" maxlength="50" placeholder="e.g. MATH">
+          </div>
+          <div class="field" style="grid-column:1/-1">
+            <label for="subject-description">Description</label>
+            <input id="subject-description" name="description" maxlength="500" placeholder="Optional subject description">
+          </div>
+        </div>
+        <div class="actions">
+          <button id="subject-save-button" type="submit">Save Subject</button>
+          <button id="subject-cancel-edit" class="secondary" type="button" hidden>Cancel Edit</button>
+        </div>
+        <div id="subject-form-message" class="notice" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+    <div class="panel">
+      <h2>Subject Records</h2>
+      <div class="toolbar">
+        <input id="subject-search" type="search" placeholder="Search subject name or code..." aria-label="Search subjects">
+        <button id="subject-search-button" type="button">Search</button>
+        <button id="subject-refresh-button" class="secondary" type="button">Refresh</button>
+      </div>
+      <div id="subject-list-message" class="notice" role="status" aria-live="polite"></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Subject Name</th><th>Code</th><th>Description</th><th>Actions</th></tr></thead>
+        <tbody id="subject-table"><tr><td colspan="4">Loading subject records...</td></tr></tbody>
+      </table></div>
+      <p class="muted" id="subject-record-count">0 subjects</p>
+    </div>
+  </div>
+</section>
+</main>
+</div>
+
+<script>
+const descriptions = {
+  "Teachers & Staff":"Manage teachers, staff details, and assignments.",
+  "Classes & Subjects":"Organize classes, subjects, and class lists.",
+  "Attendance":"Record and review student attendance.",
+  "Fees & Payments":"Manage school fees, payments, and balances.",
+  "Examinations":"Manage examination scores and student results.",
+  "Reports":"Review school statistics and generate reports.",
+  "Settings":"Configure school information and system preferences."
+};
+
+const $ = id => document.getElementById(id);
+let editingId = null;
+let students = [];
+let teachers = [];
+let editingTeacherId = null;
+let classes = [];
+let editingClassId = null;
+let subjects = [];
+let editingSubjectId = null;
+let searchTimer;
+let teacherSearchTimer;
+let classSearchTimer;
+let subjectSearchTimer;
+
+async function api(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...(options.body ? {"Content-Type":"application/json"} : {}),
+      ...options.headers
+    }
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || data.error || `Request failed (${response.status})`);
+  return data;
+}
+
+function message(id, text, error = false) {
+  $(id).textContent = text;
+  $(id).classList.toggle("error", error);
+}
+
+function showPage(page) {
+  const dashboard = page === "Dashboard";
+  $("page-title").textContent = page;
+  $("dashboard-page").hidden = !dashboard;
+  $("module-page").hidden = dashboard;
+  const implementedPage = ["Students", "Teachers & Staff", "Classes & Subjects", "Attendance"].includes(page);
+  $("placeholder").hidden = implementedPage;
+  $("students-page").hidden = page !== "Students";
+  $("teachers-page").hidden = page !== "Teachers & Staff";
+  $("classes-page").hidden = page !== "Classes & Subjects";
+  $("subjects-page").hidden = page !== "Classes & Subjects";
+  $("attendance-page").hidden = page !== "Attendance";
+  $("module-title").textContent = page;
+  $("module-description").textContent = descriptions[page] || "";
+
+  document.querySelectorAll("nav a").forEach(link => {
+    link.classList.toggle("active", link.dataset.page === page);
+  });
+
+  if (page === "Students") loadStudents();
+  if (page === "Attendance") loadAttendanceSetup();
+  if (page === "Teachers & Staff") loadTeachers();
+  if (page === "Classes & Subjects") {
+    loadClasses();
+    loadSubjects();
+    loadClassTeachers();
+  }
+  if (page === "Dashboard") {
+    loadStudentCount();
+    loadTeacherCount();
+  }
+}
+
+function loadPageFromHash() {
+  const hash = location.hash.slice(1).toLowerCase();
+  const link = [...document.querySelectorAll("nav a")]
+    .find(item => item.getAttribute("href") === "#" + hash);
+  showPage(link ? link.dataset.page : "Dashboard");
+}
+
+async function loadStudentCount() {
+  try {
+    const data = await api("/api/students");
+    $("student-count").textContent = data.length;
+  } catch {
+    $("student-count").textContent = "—";
+  }
+}
+
+function addCell(row, value) {
+  const cell = document.createElement("td");
+  cell.textContent = value ?? "";
+  row.appendChild(cell);
+  return cell;
+}
+
+async function loadStudents() {
+  $("student-table").replaceChildren();
+  const loadingRow = $("student-table").insertRow();
+  const loadingCell = loadingRow.insertCell();
+  loadingCell.colSpan = 7;
+  loadingCell.textContent = "Loading...";
+
+  try {
+    const query = $("student-search").value.trim();
+    students = await api("/api/students?search=" + encodeURIComponent(query));
+    renderStudents();
+    await loadStudentCount();
+  } catch (error) {
+    $("student-table").replaceChildren();
+    const row = $("student-table").insertRow();
+    const cell = row.insertCell();
+    cell.colSpan = 7;
+    cell.textContent = "Could not load records.";
+    message("list-message", error.message, true);
+  }
+}
+
+function renderStudents() {
+  const tbody = $("student-table");
+  tbody.replaceChildren();
+
+  if (!students.length) {
+    const row = tbody.insertRow();
+    const cell = row.insertCell();
+    cell.colSpan = 7;
+    cell.textContent = "No students found.";
+    cell.style.textAlign = "center";
+    $("record-count").textContent = "0 students";
+    return;
+  }
+
+  for (const student of students) {
+    const row = tbody.insertRow();
+    addCell(row, student.student_id);
+    addCell(row, `${student.first_name} ${student.last_name}`);
+    addCell(row, student.gender);
+    addCell(row, student.class_name);
+    addCell(row, student.guardian_name);
+    addCell(row, student.guardian_phone);
+
+    const cell = row.insertCell();
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.textContent = "Edit";
+    edit.addEventListener("click", () => startEdit(student.id));
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Delete";
+    remove.className = "danger";
+    remove.addEventListener("click", () => deleteStudent(student.id));
+
+    actions.append(edit, remove);
+    cell.appendChild(actions);
+  }
+
+  $("record-count").textContent =
+    `${students.length} student${students.length === 1 ? "" : "s"}`;
+  message("list-message", "");
+}
+
+$("student-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $("save-button");
+  button.disabled = true;
+  message("form-message", "");
+
+  const body = Object.fromEntries(new FormData(event.currentTarget).entries());
+
+  try {
+    const result = await api(
+      editingId === null ? "/api/students" : `/api/students/${editingId}`,
+      {
+        method: editingId === null ? "POST" : "PUT",
+        body: JSON.stringify(body)
+      }
+    );
+
+    message("form-message",
+      editingId === null
+        ? `Student ${result.student_id} registered successfully.`
+        : `Student ${result.student_id} updated successfully.`
+    );
+
+    resetForm();
+    await loadStudents();
+  } catch (error) {
+    message("form-message", error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+function startEdit(id) {
+  const student = students.find(item => item.id === id);
+  if (!student) return;
+
+  editingId = id;
+  for (const field of [
+    "student_id", "first_name", "last_name", "gender",
+    "date_of_birth", "class_name", "guardian_name", "guardian_phone"
+  ]) {
+    $(field).value = student[field] || "";
+  }
+
+  $("form-heading").textContent = "Edit Student";
+  $("save-button").textContent = "Save Changes";
+  $("cancel-edit").hidden = false;
+  message("form-message", "Editing " + student.student_id);
+  $("student-form").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function resetForm() {
+  editingId = null;
+  $("student-form").reset();
+  $("form-heading").textContent = "Register New Student";
+  $("save-button").textContent = "Register Student";
+  $("cancel-edit").hidden = true;
+}
+
+$("cancel-edit").addEventListener("click", () => {
+  resetForm();
+  message("form-message", "");
+});
+
+async function deleteStudent(id) {
+  const student = students.find(item => item.id === id);
+  if (!student) return;
+
+  if (!confirm(`Delete student ${student.student_id} (${student.first_name} ${student.last_name})? This cannot be undone.`)) return;
+
+  try {
+    await api(`/api/students/${id}`, {method:"DELETE"});
+    if (editingId === id) resetForm();
+    message("list-message", "Student deleted successfully.");
+    await loadStudents();
+  } catch (error) {
+    message("list-message", error.message, true);
+  }
+}
+
+$("search-button").addEventListener("click", loadStudents);
+$("refresh-button").addEventListener("click", () => {
+  $("student-search").value = "";
+  loadStudents();
+});
+$("student-search").addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(loadStudents, 300);
+});
+$("quick-students").addEventListener("click", () => {
+  location.hash = "students";
+});
+
+async function loadTeacherCount() {
+  try {
+    const data = await api("/api/teachers");
+    $("teacher-count").textContent = data.length;
+  } catch {
+    $("teacher-count").textContent = "—";
+  }
+}
+
+async function loadTeachers() {
+  const tbody = $("teacher-table");
+  tbody.replaceChildren();
+  const loadingRow = tbody.insertRow();
+  const loadingCell = loadingRow.insertCell();
+  loadingCell.colSpan = 8;
+  loadingCell.textContent = "Loading...";
+
+  try {
+    const query = $("teacher-search").value.trim();
+    teachers = await api("/api/teachers?search=" + encodeURIComponent(query));
+    renderTeachers();
+    await loadTeacherCount();
+  } catch (error) {
+    tbody.replaceChildren();
+    const row = tbody.insertRow();
+    const cell = row.insertCell();
+    cell.colSpan = 8;
+    cell.textContent = "Could not load teacher records.";
+    message("teacher-list-message", error.message, true);
+  }
+}
+
+function renderTeachers() {
+  const tbody = $("teacher-table");
+  tbody.replaceChildren();
+
+  if (!teachers.length) {
+    const row = tbody.insertRow();
+    const cell = row.insertCell();
+    cell.colSpan = 8;
+    cell.textContent = "No teachers or staff found.";
+    cell.style.textAlign = "center";
+    $("teacher-record-count").textContent = "0 teachers / staff";
+    message("teacher-list-message", "");
+    return;
+  }
+
+  for (const teacher of teachers) {
+    const row = tbody.insertRow();
+    addCell(row, teacher.staff_id);
+    addCell(row, `${teacher.first_name} ${teacher.last_name}`);
+    addCell(row, teacher.gender);
+    addCell(row, teacher.phone);
+    addCell(row, teacher.email);
+    addCell(row, teacher.subject);
+    addCell(row, teacher.qualification);
+
+    const cell = row.insertCell();
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.textContent = "Edit";
+    edit.addEventListener("click", () => startTeacherEdit(teacher.id));
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Delete";
+    remove.className = "danger";
+    remove.addEventListener("click", () => deleteTeacher(teacher.id));
+
+    actions.append(edit, remove);
+    cell.appendChild(actions);
+  }
+
+  $("teacher-record-count").textContent =
+    `${teachers.length} teacher${teachers.length === 1 ? "" : "s"} / staff`;
+  message("teacher-list-message", "");
+}
+
+$("teacher-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $("teacher-save-button");
+  button.disabled = true;
+  message("teacher-form-message", "");
+
+  const body = Object.fromEntries(new FormData(event.currentTarget).entries());
+
+  try {
+    const result = await api(
+      editingTeacherId === null ? "/api/teachers" : `/api/teachers/${editingTeacherId}`,
+      {
+        method: editingTeacherId === null ? "POST" : "PUT",
+        body: JSON.stringify(body)
+      }
+    );
+
+    message("teacher-form-message",
+      editingTeacherId === null
+        ? `Teacher / staff member ${result.staff_id} registered successfully.`
+        : `Teacher / staff member ${result.staff_id} updated successfully.`
+    );
+
+    resetTeacherForm();
+    await loadTeachers();
+  } catch (error) {
+    message("teacher-form-message", error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+function startTeacherEdit(id) {
+  const teacher = teachers.find(item => item.id === id);
+  if (!teacher) return;
+
+  editingTeacherId = id;
+  $("staff_id").value = teacher.staff_id || "";
+  $("teacher_first_name").value = teacher.first_name || "";
+  $("teacher_last_name").value = teacher.last_name || "";
+  $("teacher_gender").value = teacher.gender || "";
+  $("teacher_phone").value = teacher.phone || "";
+  $("teacher_email").value = teacher.email || "";
+  $("teacher_subject").value = teacher.subject || "";
+  $("teacher_qualification").value = teacher.qualification || "";
+
+  $("teacher-form-heading").textContent = "Edit Teacher / Staff";
+  $("teacher-save-button").textContent = "Save Changes";
+  $("teacher-cancel-edit").hidden = false;
+  message("teacher-form-message", "Editing " + teacher.staff_id);
+  $("teacher-form").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function resetTeacherForm() {
+  editingTeacherId = null;
+  $("teacher-form").reset();
+  $("teacher-form-heading").textContent = "Register New Teacher / Staff";
+  $("teacher-save-button").textContent = "Register Teacher";
+  $("teacher-cancel-edit").hidden = true;
+}
+
+$("teacher-cancel-edit").addEventListener("click", () => {
+  resetTeacherForm();
+  message("teacher-form-message", "");
+});
+
+async function deleteTeacher(id) {
+  const teacher = teachers.find(item => item.id === id);
+  if (!teacher) return;
+
+  if (!confirm(`Delete staff member ${teacher.staff_id} (${teacher.first_name} ${teacher.last_name})? This cannot be undone.`)) return;
+
+  try {
+    await api(`/api/teachers/${id}`, {method:"DELETE"});
+    if (editingTeacherId === id) resetTeacherForm();
+    message("teacher-list-message", "Teacher / staff member deleted successfully.");
+    await loadTeachers();
+  } catch (error) {
+    message("teacher-list-message", error.message, true);
+  }
+}
+
+$("teacher-search-button").addEventListener("click", loadTeachers);
+$("teacher-refresh-button").addEventListener("click", () => {
+  $("teacher-search").value = "";
+  loadTeachers();
+});
+$("teacher-search").addEventListener("input", () => {
+  clearTimeout(teacherSearchTimer);
+  teacherSearchTimer = setTimeout(loadTeachers, 300);
+});
+
+
+
+// CLASSES MODULE
+async function loadClassTeachers() {
+  try {
+    const data = await api("/api/teachers");
+    const select = $("class-teacher");
+    const selected = select.value;
+    select.replaceChildren(new Option("No class teacher assigned", ""));
+    for (const teacher of data) {
+      select.add(new Option(`${teacher.first_name} ${teacher.last_name} (${teacher.staff_id})`, teacher.id));
+    }
+    if (selected) select.value = selected;
+  } catch (error) {
+    message("class-form-message", "Could not load teacher list: " + error.message, true);
+  }
+}
+
+async function loadClasses() {
+  const tbody = $("class-table");
+  tbody.replaceChildren();
+  const loading = tbody.insertRow().insertCell();
+  loading.colSpan = 4;
+  loading.textContent = "Loading...";
+  try {
+    const query = $("class-search").value.trim();
+    const result = await api("/api/classes?search=" + encodeURIComponent(query));
+    classes = result.data || [];
+    renderClasses();
+  } catch (error) {
+    tbody.replaceChildren();
+    const cell = tbody.insertRow().insertCell();
+    cell.colSpan = 4;
+    cell.textContent = "Could not load class records.";
+    message("class-list-message", error.message, true);
+  }
+}
+
+function renderClasses() {
+  const tbody = $("class-table");
+  tbody.replaceChildren();
+  if (!classes.length) {
+    const cell = tbody.insertRow().insertCell();
+    cell.colSpan = 4;
+    cell.textContent = "No classes found.";
+    cell.style.textAlign = "center";
+  }
+  for (const item of classes) {
+    const row = tbody.insertRow();
+    addCell(row, item.class_name);
+    addCell(row, item.level);
+    addCell(row, item.class_teacher || "Not assigned");
+    const cell = row.insertCell();
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.textContent = "Edit";
+    edit.addEventListener("click", () => startClassEdit(item.id));
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Delete";
+    remove.className = "danger";
+    remove.addEventListener("click", () => deleteClass(item.id));
+    const actions = document.createElement("div");
+    actions.className = "actions";
+    actions.append(edit, remove);
+    cell.appendChild(actions);
+  }
+  $("class-record-count").textContent = `${classes.length} class${classes.length === 1 ? "" : "es"}`;
+  message("class-list-message", "");
+}
+
+$("class-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $("class-save-button");
+  button.disabled = true;
+  message("class-form-message", "");
+  const body = Object.fromEntries(new FormData(event.currentTarget).entries());
+  try {
+    const result = await api(editingClassId === null ? "/api/classes" : `/api/classes/${editingClassId}`, {
+      method: editingClassId === null ? "POST" : "PUT",
+      body: JSON.stringify(body)
+    });
+    message("class-form-message", result.message || "Class saved successfully.");
+    resetClassForm();
+    await loadClasses();
+  } catch (error) {
+    message("class-form-message", error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+function startClassEdit(id) {
+  const item = classes.find(entry => entry.id === id);
+  if (!item) return;
+  editingClassId = id;
+  $("class-record-name").value = item.class_name || "";
+  $("class-level").value = item.level || "";
+  $("class-teacher").value = item.class_teacher_id == null ? "" : String(item.class_teacher_id);
+  $("class-form-heading").textContent = "Edit Class";
+  $("class-save-button").textContent = "Save Changes";
+  $("class-cancel-edit").hidden = false;
+  message("class-form-message", `Editing ${item.class_name}`);
+  $("class-form").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function resetClassForm() {
+  editingClassId = null;
+  $("class-form").reset();
+  $("class-form-heading").textContent = "Add New Class";
+  $("class-save-button").textContent = "Save Class";
+  $("class-cancel-edit").hidden = true;
+}
+
+$("class-cancel-edit").addEventListener("click", () => {
+  resetClassForm();
+  message("class-form-message", "");
+});
+
+async function deleteClass(id) {
+  const item = classes.find(entry => entry.id === id);
+  if (!item || !confirm(`Delete class ${item.class_name}? This cannot be undone.`)) return;
+  try {
+    const result = await api(`/api/classes/${id}`, { method: "DELETE" });
+    message("class-list-message", result.message || "Class deleted successfully.");
+    if (editingClassId === id) resetClassForm();
+    await loadClasses();
+  } catch (error) {
+    message("class-list-message", error.message, true);
+  }
+}
+
+$("class-search-button").addEventListener("click", loadClasses);
+$("class-refresh-button").addEventListener("click", () => {
+  $("class-search").value = "";
+  loadClasses();
+});
+$("class-search").addEventListener("input", () => {
+  clearTimeout(classSearchTimer);
+  classSearchTimer = setTimeout(loadClasses, 300);
+});
+
+// SUBJECTS MODULE
+async function loadSubjects() {
+  const tbody = $("subject-table");
+  tbody.replaceChildren();
+  const loading = tbody.insertRow().insertCell();
+  loading.colSpan = 4;
+  loading.textContent = "Loading...";
+  try {
+    const query = $("subject-search").value.trim();
+    const result = await api("/api/subjects?search=" + encodeURIComponent(query));
+    subjects = result.data || [];
+    renderSubjects();
+  } catch (error) {
+    tbody.replaceChildren();
+    const cell = tbody.insertRow().insertCell();
+    cell.colSpan = 4;
+    cell.textContent = "Could not load subject records.";
+    message("subject-list-message", error.message, true);
+  }
+}
+
+function renderSubjects() {
+  const tbody = $("subject-table");
+  tbody.replaceChildren();
+  if (!subjects.length) {
+    const cell = tbody.insertRow().insertCell();
+    cell.colSpan = 4;
+    cell.textContent = "No subjects found.";
+    cell.style.textAlign = "center";
+  }
+  for (const item of subjects) {
+    const row = tbody.insertRow();
+    addCell(row, item.subject_name);
+    addCell(row, item.subject_code || "—");
+    addCell(row, item.description || "—");
+    const cell = row.insertCell();
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.textContent = "Edit";
+    edit.addEventListener("click", () => startSubjectEdit(item.id));
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Delete";
+    remove.className = "danger";
+    remove.addEventListener("click", () => deleteSubject(item.id));
+    const actions = document.createElement("div");
+    actions.className = "actions";
+    actions.append(edit, remove);
+    cell.appendChild(actions);
+  }
+  $("subject-record-count").textContent = `${subjects.length} subject${subjects.length === 1 ? "" : "s"}`;
+  message("subject-list-message", "");
+}
+
+$("subject-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $("subject-save-button");
+  button.disabled = true;
+  message("subject-form-message", "");
+  const body = Object.fromEntries(new FormData(event.currentTarget).entries());
+  try {
+    const result = await api(editingSubjectId === null ? "/api/subjects" : `/api/subjects/${editingSubjectId}`, {
+      method: editingSubjectId === null ? "POST" : "PUT",
+      body: JSON.stringify(body)
+    });
+    message("subject-form-message", result.message || "Subject saved successfully.");
+    resetSubjectForm();
+    await loadSubjects();
+  } catch (error) {
+    message("subject-form-message", error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+function startSubjectEdit(id) {
+  const item = subjects.find(entry => entry.id === id);
+  if (!item) return;
+  editingSubjectId = id;
+  $("subject-name").value = item.subject_name || "";
+  $("subject-code").value = item.subject_code || "";
+  $("subject-description").value = item.description || "";
+  $("subject-form-heading").textContent = "Edit Subject";
+  $("subject-save-button").textContent = "Save Changes";
+  $("subject-cancel-edit").hidden = false;
+  message("subject-form-message", `Editing ${item.subject_name}`);
+  $("subject-form").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function resetSubjectForm() {
+  editingSubjectId = null;
+  $("subject-form").reset();
+  $("subject-form-heading").textContent = "Add New Subject";
+  $("subject-save-button").textContent = "Save Subject";
+  $("subject-cancel-edit").hidden = true;
+}
+
+$("subject-cancel-edit").addEventListener("click", () => {
+  resetSubjectForm();
+  message("subject-form-message", "");
+});
+
+async function deleteSubject(id) {
+  const item = subjects.find(entry => entry.id === id);
+  if (!item || !confirm(`Delete subject ${item.subject_name}? This cannot be undone.`)) return;
+  try {
+    const result = await api(`/api/subjects/${id}`, { method: "DELETE" });
+    message("subject-list-message", result.message || "Subject deleted successfully.");
+    if (editingSubjectId === id) resetSubjectForm();
+    await loadSubjects();
+  } catch (error) {
+    message("subject-list-message", error.message, true);
+  }
+}
+
+$("subject-search-button").addEventListener("click", loadSubjects);
+$("subject-refresh-button").addEventListener("click", () => {
+  $("subject-search").value = "";
+  loadSubjects();
+});
+$("subject-search").addEventListener("input", () => {
+  clearTimeout(subjectSearchTimer);
+  subjectSearchTimer = setTimeout(loadSubjects, 300);
+});
+
+
+// ATTENDANCE MODULE
+let attendanceStudents = [];
+let attendanceClassesLoaded = false;
+
+function localDateString() {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+async function loadAttendanceSetup() {
+  if (!$("attendance-date").value) {
+    $("attendance-date").value = localDateString();
+  }
+
+  try {
+    const result = await api("/api/classes");
+    const classList = Array.isArray(result) ? result : (result.data || []);
+    const select = $("attendance-class");
+    const current = select.value;
+    select.replaceChildren(new Option("All classes", ""));
+    for (const item of classList) {
+      if (item.class_name) {
+        select.add(new Option(item.class_name, item.class_name));
+      }
+    }
+    if ([...select.options].some(option => option.value === current)) {
+      select.value = current;
+    }
+    attendanceClassesLoaded = true;
+    await loadAttendance();
+  } catch (error) {
+    message("attendance-message", "Could not load classes: " + error.message, true);
+  }
+}
+
+async function loadAttendance() {
+  const tbody = $("attendance-table");
+  tbody.replaceChildren();
+  const loading = tbody.insertRow().insertCell();
+  loading.colSpan = 5;
+  loading.textContent = "Loading students...";
+
+  const date = $("attendance-date").value;
+  if (!date) {
+    tbody.replaceChildren();
+    const cell = tbody.insertRow().insertCell();
+    cell.colSpan = 5;
+    cell.textContent = "Please select an attendance date.";
+    return;
+  }
+
+  try {
+    const [studentsResult, attendanceResult] = await Promise.all([
+      api("/api/students"),
+      api("/api/attendance?date=" + encodeURIComponent(date) +
+        "&class_name=" + encodeURIComponent($("attendance-class").value))
+    ]);
+
+    const students = Array.isArray(studentsResult)
+      ? studentsResult
+      : (studentsResult.data || []);
+    const attendance = Array.isArray(attendanceResult.data)
+      ? attendanceResult.data
+      : [];
+    const attendanceByStudent = new Map(
+      attendance.map(record => [String(record.student_id), record])
+    );
+
+    attendanceStudents = students
+      .filter(student => !$("attendance-class").value ||
+        student.class_name === $("attendance-class").value)
+      .map(student => {
+        const record = attendanceByStudent.get(String(student.id));
+        return {
+          ...student,
+          status: record?.status || "",
+          remarks: record?.remarks || ""
+        };
+      });
+
+    renderAttendance();
+    message("attendance-message", attendanceStudents.length
+      ? `Loaded ${attendanceStudents.length} student(s) for ${date}.`
+      : "No students found for this class. Register students first, and make sure their class name matches the class record.");
+  } catch (error) {
+    tbody.replaceChildren();
+    const cell = tbody.insertRow().insertCell();
+    cell.colSpan = 5;
+    cell.textContent = "Could not load attendance.";
+    message("attendance-message", error.message, true);
+  }
+}
+
+function renderAttendance() {
+  const tbody = $("attendance-table");
+  tbody.replaceChildren();
+
+  if (!attendanceStudents.length) {
+    const cell = tbody.insertRow().insertCell();
+    cell.colSpan = 5;
+    cell.textContent = "No students to display.";
+    $("attendance-record-count").textContent = "0 students";
+    return;
+  }
+
+  attendanceStudents.forEach((student, index) => {
+    const row = tbody.insertRow();
+    addCell(row, student.student_id || "—");
+    addCell(row, `${student.first_name || ""} ${student.last_name || ""}`.trim());
+    addCell(row, student.class_name || "—");
+
+    const statusCell = row.insertCell();
+    const statusSelect = document.createElement("select");
+    statusSelect.setAttribute("aria-label", `Attendance status for ${student.first_name} ${student.last_name}`);
+    statusSelect.dataset.index = String(index);
+    statusSelect.add(new Option("Select status", ""));
+    ["Present", "Absent", "Late"].forEach(status => {
+      statusSelect.add(new Option(status, status));
+    });
+    statusSelect.value = student.status;
+    statusSelect.addEventListener("change", () => {
+      attendanceStudents[index].status = statusSelect.value;
+    });
+    statusCell.appendChild(statusSelect);
+
+    const remarksCell = row.insertCell();
+    const remarksInput = document.createElement("input");
+    remarksInput.type = "text";
+    remarksInput.maxLength = 500;
+    remarksInput.placeholder = "Optional remarks";
+    remarksInput.setAttribute("aria-label", `Remarks for ${student.first_name} ${student.last_name}`);
+    remarksInput.value = student.remarks;
+    remarksInput.addEventListener("input", () => {
+      attendanceStudents[index].remarks = remarksInput.value;
+    });
+    remarksCell.appendChild(remarksInput);
+  });
+
+  $("attendance-record-count").textContent =
+    `${attendanceStudents.length} student${attendanceStudents.length === 1 ? "" : "s"}`;
+}
+
+$("attendance-load-button").addEventListener("click", loadAttendance);
+$("attendance-date").addEventListener("change", loadAttendance);
+$("attendance-class").addEventListener("change", loadAttendance);
+
+$("attendance-mark-present-button").addEventListener("click", () => {
+  attendanceStudents.forEach(student => { student.status = "Present"; });
+  renderAttendance();
+  message("attendance-message", "All displayed students are marked Present. Click Save Attendance to store the changes.");
+});
+
+$("attendance-save-button").addEventListener("click", async () => {
+  const date = $("attendance-date").value;
+  if (!date) {
+    message("attendance-message", "Please select an attendance date.", true);
+    return;
+  }
+  if (!attendanceStudents.length) {
+    message("attendance-message", "There are no students to save.", true);
+    return;
+  }
+
+  const unmarked = attendanceStudents.filter(student => !student.status);
+  if (unmarked.length) {
+    message("attendance-message", `Please select a status for all students. ${unmarked.length} student(s) are not marked yet.`, true);
+    return;
+  }
+
+  const button = $("attendance-save-button");
+  button.disabled = true;
+  message("attendance-message", "Saving attendance...");
+  try {
+    for (const student of attendanceStudents) {
+      await api("/api/attendance", {
+        method: "POST",
+        body: JSON.stringify({
+          student_id: student.id,
+          attendance_date: date,
+          status: student.status,
+          remarks: student.remarks || ""
+        })
+      });
+    }
+    message("attendance-message", `Attendance saved successfully for ${attendanceStudents.length} student(s) on ${date}.`);
+    await loadAttendance();
+  } catch (error) {
+    message("attendance-message", "Could not save all attendance records: " + error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+window.addEventListener("hashchange", loadPageFromHash);
+loadPageFromHash();
+</script>
+</body>
+</html>

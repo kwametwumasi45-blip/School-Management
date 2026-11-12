@@ -1,0 +1,19 @@
+{
+  "name": "emena-school-system",
+  "version": "1.0.0",
+  "description": "Recovered local Emena School Management System project files",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "dotenv": "^18.0.10",
+    "express": "^5.1.0",
+    "firebase-admin": "^14.5.1"
+  },
+  "allowScripts": {
+    "better-sqlite3@12.11.1": true
+  }
+}

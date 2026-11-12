@@ -1,0 +1,33 @@
+EMENA SCHOOL MANAGEMENT SYSTEM - RECOVERY PACKAGE
+
+Recovered into project structure:
+- server.js (saved source)
+- database/db.js (saved source; creates schema and emena.db when run)
+- public/index.html (from the saved dashboard ZIP)
+- public/css/style.css (from the saved dashboard ZIP)
+- public/js/app.js (from the saved dashboard ZIP)
+- recovery_archive/ (older full HTML versions, saved JavaScript variants, pasted source snapshots, and original dashboard ZIP)
+- package.json (reconstructed from the known project name and confirmed Express/SQLite stack; dependency versions may be adjusted)
+
+NOT RECOVERED AS COMPLETE FILES:
+- routes/students.js
+- routes/teachers.js
+- routes/classes.js
+- routes/subjects.js
+- routes/attendance.js
+- routes/examinations.js
+- routes/auth.js and middleware/auth.js
+- public/login.html
+- the original database file database/emena.db and its records
+- complete package-lock.json / node_modules
+
+IMPORTANT:
+This is a recovery bundle of files actually found in saved project history, not a verified runnable full application.
+The saved server.js imports route files that are not included, so npm start will fail until those routes are restored.
+The dashboard bundle also expects authentication and APIs including fees, reports and settings.
+Do not overwrite any surviving local database file with an empty one. Keep the recovery_archive folder; it contains older source versions useful for rebuilding missing modules.
+
+To open in VS Code:
+1. Extract this ZIP to a folder, for example C:\Users\USER\Emena-School-System-Recovered.
+2. In VS Code choose File > Open Folder and select that extracted folder.
+3. Keep your old project folder untouched until we verify the recovered code.

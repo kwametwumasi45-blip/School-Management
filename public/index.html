@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emena School Management System</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">E</div>
+        <div><strong>EMENA</strong><small>School Management</small></div>
+      </div>
+      <nav class="navigation" aria-label="Main navigation">
+        <button class="nav-link active" data-page="dashboard"><span>▦</span> Dashboard</button>
+        <button class="nav-link" data-page="students"><span>♙</span> Students</button>
+        <button class="nav-link" data-page="teachers"><span>♧</span> Teachers &amp; Staff</button>
+        <button class="nav-link" data-page="classes"><span>▤</span> Classes</button>
+        <button class="nav-link" data-page="subjects"><span>▧</span> Subjects</button>
+        <button class="nav-link" data-page="attendance"><span>✓</span> Attendance</button>
+        <button class="nav-link" data-page="examinations"><span>▣</span> Examinations</button>
+        <button class="nav-link" data-page="fees"><span>₵</span> Fees &amp; Payments</button>
+        <button class="nav-link" data-page="reports"><span>▥</span> Reports</button>
+        <button class="nav-link" data-page="settings"><span>⚙</span> Settings</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="signed-in"><span class="status-dot"></span><span>Signed-in session</span></div>
+        <button id="logout-button" class="logout-button">↪ Log out</button>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">☰</button>
+        <div><p class="eyebrow">SCHOOL ADMINISTRATION</p><h1 id="page-title">Dashboard</h1></div>
+        <div class="topbar-right"><span id="today-label"></span><span class="admin-chip">Administrator</span></div>
+      </header>
+
+      <section id="dashboard-page" class="page active">
+        <div class="welcome-panel">
+          <div><p class="eyebrow light">EMENA SCHOOL MANAGEMENT SYSTEM</p><h2>Welcome to your school dashboard</h2>
+          <p>Manage school records, academic activities and payments from one place.</p></div>
+          <div class="welcome-icon">Ｅ</div>
+        </div>
+        <div class="stats-grid">
+          <article class="stat-card"><span class="stat-label">Students</span><strong id="stat-students">—</strong><small>Registered students</small></article>
+          <article class="stat-card"><span class="stat-label">Teachers</span><strong id="stat-teachers">—</strong><small>Teaching staff</small></article>
+          <article class="stat-card"><span class="stat-label">Classes</span><strong id="stat-classes">—</strong><small>Available classes</small></article>
+          <article class="stat-card"><span class="stat-label">Subjects</span><strong id="stat-subjects">—</strong><small>School subjects</small></article>
+        </div>
+        <div class="content-card">
+          <div class="section-heading"><div><h2>School modules</h2><p>Choose a module to open its records.</p></div></div>
+          <div class="module-grid">
+            <button class="module-card" data-page="students"><span>♙</span><strong>Students</strong><small>Student registration and records</small></button>
+            <button class="module-card" data-page="teachers"><span>♧</span><strong>Teachers &amp; Staff</strong><small>Staff information</small></button>
+            <button class="module-card" data-page="classes"><span>▤</span><strong>Classes</strong><small>Class management</small></button>
+            <button class="module-card" data-page="subjects"><span>▧</span><strong>Subjects</strong><small>Subject records</small></button>
+            <button class="module-card" data-page="attendance"><span>✓</span><strong>Attendance</strong><small>Attendance records</small></button>
+            <button class="module-card" data-page="examinations"><span>▣</span><strong>Examinations</strong><small>Examination results</small></button>
+            <button class="module-card" data-page="fees"><span>₵</span><strong>Fees &amp; Payments</strong><small>Fees and payment records</small></button>
+            <button class="module-card" data-page="reports"><span>▥</span><strong>Reports</strong><small>School summaries</small></button>
+            <button class="module-card" data-page="settings"><span>⚙</span><strong>Settings</strong><small>School information</small></button>
+          </div>
+        </div>
+      </section>
+
+      <section id="module-page" class="page" hidden>
+        <div class="content-card">
+          <div class="section-heading module-heading">
+            <div><h2 id="module-heading">Records</h2><p id="module-description">Records from your school database.</p></div>
+            <button id="refresh-button" class="button secondary">Refresh</button>
+          </div>
+          <div id="module-message" class="message" role="status">Choose a module from the menu.</div>
+          <div class="table-container">
+            <table id="records-table">
+              <thead id="records-head"></thead>
+              <tbody id="records-body"></tbody>
+            </table>
+          </div>
+          <p id="record-count" class="record-count"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

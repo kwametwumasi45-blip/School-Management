@@ -1,0 +1,422 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emena School Management System</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:#f3f6fb;color:#1e293b}
+    button,input,select,textarea{font:inherit}
+    button{background:#2563eb;color:white;border:0;border-radius:6px;padding:10px 14px;cursor:pointer}
+    button:hover{background:#1d4ed8}
+    button.secondary{background:#64748b}
+    input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;background:white}
+    label{display:block;font-size:13px;font-weight:bold;margin-bottom:6px}
+    .app{display:flex;min-height:100vh}
+    aside{width:240px;background:#172554;color:white;padding:22px 14px;flex-shrink:0}
+    aside h2{font-size:20px;margin:0 0 25px}
+    aside button{display:block;width:100%;text-align:left;background:transparent;margin:5px 0}
+    aside button:hover,aside button.active{background:#1d4ed8}
+    main{flex:1;min-width:0;padding:26px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+    h1{font-size:26px;margin:0}
+    h2{font-size:19px;margin-top:0}
+    .muted{color:#64748b;font-size:14px}
+    .panel{background:white;border-radius:10px;padding:20px;margin-bottom:20px;box-shadow:0 2px 8px #0f172a0a}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:20px}
+    .stat{background:white;border-radius:10px;padding:20px}
+    .stat strong{display:block;font-size:28px;margin-top:10px;color:#1d4ed8}
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+    .field{min-width:0}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .toolbar input{flex:1;min-width:200px}
+    .table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:650px}
+    th,td{text-align:left;padding:11px;border-bottom:1px solid #e2e8f0;font-size:13px}
+    th{background:#f8fafc}
+    .notice{margin-top:12px;font-size:14px}
+    .error{color:#b91c1c}
+    .success{color:#15803d}
+    [hidden]{display:none!important}
+    @media(max-width:700px){.app{display:block}aside{width:100%;padding:15px}aside nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}aside button{margin:0;font-size:13px}main{padding:15px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <h2>Emena School</h2>
+    <nav id="navigation">
+      <button class="active" data-page="dashboard">Dashboard</button>
+      <button data-page="students">Students</button>
+      <button data-page="teachers">Teachers &amp; Staff</button>
+      <button data-page="classes">Classes</button>
+      <button data-page="subjects">Subjects</button>
+      <button data-page="attendance">Attendance</button>
+      <button data-page="examinations">Examinations</button>
+      <button data-page="fees">Fees &amp; Payments</button>
+      <button data-page="reports">Reports</button>
+      <button data-page="settings">Settings</button>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="top">
+      <div>
+        <h1 id="page-title">Dashboard</h1>
+        <p class="muted">Emena School Management System</p>
+      </div>
+      <button class="secondary" id="refresh-button">Refresh Data</button>
+    </div>
+
+    <section id="page-dashboard" class="page">
+      <div class="stats">
+        <div class="stat">Registered Students<strong id="student-count">—</strong></div>
+        <div class="stat">Teachers<strong id="teacher-count">—</strong></div>
+        <div class="stat">Subjects<strong id="subject-count">—</strong></div>
+        <div class="stat">Examination Results<strong id="exam-count">—</strong></div>
+      </div>
+      <div class="panel">
+        <h2>Welcome to Emena</h2>
+        <p class="muted">Use the navigation menu to manage school records. Data is loaded from your local server.</p>
+        <div id="dashboard-message" class="notice" role="status"></div>
+      </div>
+    </section>
+
+    <section id="page-students" class="page" hidden>
+      <div class="panel">
+        <h2>Register Student</h2>
+        <form id="student-form">
+          <div class="form-grid">
+            <div class="field"><label>Student ID *</label><input name="student_id" required></div>
+            <div class="field"><label>First Name *</label><input name="first_name" required></div>
+            <div class="field"><label>Last Name *</label><input name="last_name" required></div>
+            <div class="field"><label>Gender *</label><select name="gender" required><option value="">Choose</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+            <div class="field"><label>Date of Birth</label><input name="date_of_birth" type="date"></div>
+            <div class="field"><label>Class *</label><input name="class_name" required></div>
+            <div class="field"><label>Parent/Guardian Name *</label><input name="guardian_name" required></div>
+            <div class="field"><label>Parent/Guardian Phone *</label><input name="guardian_phone" required></div>
+          </div>
+          <div class="actions"><button type="submit">Save Student</button><button type="reset" class="secondary">Clear</button></div>
+          <div id="student-message" class="notice" role="status"></div>
+        </form>
+      </div>
+      <div class="panel"><h2>Student Records</h2><div class="toolbar"><input id="student-search" placeholder="Search students..."></div><div class="table-wrap"><table><thead><tr><th>Student ID</th><th>Name</th><th>Gender</th><th>Class</th><th>Guardian</th><th>Phone</th></tr></thead><tbody id="student-table"></tbody></table></div></div>
+    </section>
+
+    <section id="page-teachers" class="page" hidden>
+      <div class="panel">
+        <h2>Register Teacher</h2>
+        <form id="teacher-form">
+          <div class="form-grid">
+            <div class="field"><label>Staff ID *</label><input name="staff_id" required></div>
+            <div class="field"><label>First Name *</label><input name="first_name" required></div>
+            <div class="field"><label>Last Name *</label><input name="last_name" required></div>
+            <div class="field"><label>Gender</label><select name="gender"><option value="">Choose</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+            <div class="field"><label>Phone</label><input name="phone"></div>
+            <div class="field"><label>Email</label><input name="email" type="email"></div>
+            <div class="field"><label>Subject</label><input name="subject"></div>
+            <div class="field"><label>Qualification</label><input name="qualification"></div>
+          </div>
+          <div class="actions"><button type="submit">Save Teacher</button><button type="reset" class="secondary">Clear</button></div>
+          <div id="teacher-message" class="notice" role="status"></div>
+        </form>
+      </div>
+      <div class="panel"><h2>Teacher Records</h2><div class="table-wrap"><table><thead><tr><th>Staff ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Subject</th><th>Qualification</th></tr></thead><tbody id="teacher-table"></tbody></table></div></div>
+    </section>
+
+    <section id="page-classes" class="page" hidden>
+      <div class="panel"><h2>Classes</h2><p class="muted">View the classes already recorded in your system.</p><div class="table-wrap"><table><thead><tr><th>Class</th><th>Details</th></tr></thead><tbody id="class-table"></tbody></table></div><div id="class-message" class="notice"></div></div>
+    </section>
+
+    <section id="page-subjects" class="page" hidden>
+      <div class="panel">
+        <h2>Add Subject</h2>
+        <form id="subject-form"><div class="form-grid">
+          <div class="field"><label>Subject Name *</label><input name="subject_name" required></div>
+          <div class="field"><label>Subject Code</label><input name="subject_code"></div>
+          <div class="field"><label>Description</label><input name="description"></div>
+        </div><div class="actions"><button type="submit">Save Subject</button></div><div id="subject-message" class="notice"></div></form>
+      </div>
+      <div class="panel"><h2>Subject Records</h2><div class="table-wrap"><table><thead><tr><th>Name</th><th>Code</th><th>Description</th></tr></thead><tbody id="subject-table"></tbody></table></div></div>
+    </section>
+
+    <section id="page-attendance" class="page" hidden>
+      <div class="panel"><h2>Attendance Records</h2><p class="muted">This page will display records returned by your attendance API.</p><div class="table-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Date</th><th>Status</th></tr></thead><tbody id="attendance-table"></tbody></table></div><div id="attendance-message" class="notice"></div></div>
+    </section>
+
+    <section id="page-examinations" class="page" hidden>
+      <div class="panel">
+        <h2>Enter Examination Results</h2>
+        <p class="muted">Class score: maximum 30. Examination score: maximum 70.</p>
+        <form id="exam-form"><div class="form-grid">
+          <div class="field"><label>Student *</label><select id="exam-student" name="student_id" required><option value="">Select student</option></select></div>
+          <div class="field"><label>Subject *</label><select id="exam-subject" name="subject_id" required><option value="">Select subject</option></select></div>
+          <div class="field"><label>Class *</label><input id="exam-class" name="class_name" required readonly></div>
+          <div class="field"><label>Examination Name *</label><input name="exam_name" required placeholder="End of Term Examination"></div>
+          <div class="field"><label>Academic Year *</label><input name="academic_year" required placeholder="2026/2027"></div>
+          <div class="field"><label>Term *</label><select name="term" required><option value="">Select term</option><option>Term 1</option><option>Term 2</option><option>Term 3</option></select></div>
+          <div class="field"><label>Class Score (0–30) *</label><input id="class-score" name="class_score" type="number" min="0" max="30" step="0.01" required></div>
+          <div class="field"><label>Exam Score (0–70) *</label><input id="exam-score" name="exam_score" type="number" min="0" max="70" step="0.01" required></div>
+          <div class="field"><label>Total / 100</label><input id="exam-total" readonly value="0"></div>
+          <div class="field"><label>Grade</label><input id="exam-grade" readonly value="—"></div>
+          <div class="field"><label>Remarks</label><input name="remarks"></div>
+        </div><div class="actions"><button type="submit">Save Result</button><button type="reset" class="secondary">Clear Form</button></div><div id="exam-message" class="notice" role="status"></div></form>
+      </div>
+      <div class="panel"><h2>Examination Records</h2><div class="toolbar"><input id="exam-search" placeholder="Search results..."></div><div class="table-wrap"><table><thead><tr><th>Student ID</th><th>Student Name</th><th>Class</th><th>Subject</th><th>Exam</th><th>Year</th><th>Term</th><th>Class Score</th><th>Exam Score</th><th>Total</th><th>Grade</th></tr></thead><tbody id="exam-table"></tbody></table></div></div>
+    </section>
+
+    <section id="page-fees" class="page" hidden><div class="panel"><h2>Fees &amp; Payments</h2><p class="muted">The fees and payments API has not been connected yet. We'll build this module next.</p></div></section>
+    <section id="page-reports" class="page" hidden><div class="panel"><h2>Reports</h2><p class="muted">Reports will be developed after we verify the data in each module.</p></div></section>
+    <section id="page-settings" class="page" hidden><div class="panel"><h2>Settings</h2><p class="muted">System settings will be added in a later step.</p></div></section>
+  </main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const state = {students:[],teachers:[],classes:[],subjects:[],attendance:[],examinations:[]};
+
+async function api(url, options={}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {"Content-Type":"application/json", ...(options.headers||{})}
+  });
+  let result;
+  try { result = await response.json(); }
+  catch { throw new Error("The server returned an invalid response."); }
+  if (!response.ok || result.success === false) {
+    throw new Error(result.message || `Request failed (${response.status})`);
+  }
+  return result;
+}
+
+function dataOf(result) {
+  if (Array.isArray(result)) return result;
+  return result && Array.isArray(result.data) ? result.data : [];
+}
+function notify(id, text, error=false) {
+  const el=$(id);
+  if (!el) return;
+  el.textContent=text;
+  el.className="notice "+(error?"error":"success");
+}
+function cell(row, value) {
+  row.insertCell().textContent = value == null ? "" : String(value);
+}
+function addRow(tableId, values) {
+  const row=$(tableId).insertRow();
+  values.forEach(value=>cell(row,value));
+}
+function emptyRow(tableId, columns, text="No records found.") {
+  const body=$(tableId);
+  body.replaceChildren();
+  const row=body.insertRow();
+  const td=row.insertCell();
+  td.colSpan=columns;
+  td.textContent=text;
+}
+function grade(total) {
+  if(total>=80)return "A";
+  if(total>=70)return "B";
+  if(total>=60)return "C";
+  if(total>=50)return "D";
+  if(total>=40)return "E";
+  return "F";
+}
+
+function showPage(page) {
+  document.querySelectorAll(".page").forEach(el=>el.hidden=true);
+  $("page-"+page).hidden=false;
+  document.querySelectorAll("#navigation button").forEach(btn=>btn.classList.toggle("active",btn.dataset.page===page));
+  $("page-title").textContent=({dashboard:"Dashboard",students:"Students",teachers:"Teachers & Staff",classes:"Classes",subjects:"Subjects",attendance:"Attendance",examinations:"Examinations",fees:"Fees & Payments",reports:"Reports",settings:"Settings"})[page]||page;
+  location.hash=page;
+  loadPage(page);
+}
+$("navigation").addEventListener("click",event=>{
+  const button=event.target.closest("button[data-page]");
+  if(button)showPage(button.dataset.page);
+});
+
+async function loadStudents() {
+  state.students=dataOf(await api("/api/students"));
+  renderStudents();
+  $("student-count").textContent=state.students.length;
+  fillExamChoices();
+}
+function renderStudents() {
+  const q=$("student-search").value.trim().toLowerCase();
+  const list=state.students.filter(s=>[s.student_id,s.first_name,s.last_name,s.class_name,s.guardian_name].join(" ").toLowerCase().includes(q));
+  $("student-table").replaceChildren();
+  if(!list.length)return emptyRow("student-table",6);
+  list.forEach(s=>addRow("student-table",[s.student_id,`${s.first_name||""} ${s.last_name||""}`.trim(),s.gender,s.class_name,s.guardian_name,s.guardian_phone]));
+}
+$("student-search").addEventListener("input",renderStudents);
+$("student-form").addEventListener("submit",async event=>{
+  event.preventDefault();
+  try {
+    const body=Object.fromEntries(new FormData(event.currentTarget));
+    const result=await api("/api/students",{method:"POST",body:JSON.stringify(body)});
+    notify("student-message",result.message||"Student saved successfully.");
+    event.currentTarget.reset();
+    await loadStudents();
+  } catch(error) {notify("student-message",error.message,true);}
+});
+
+async function loadTeachers() {
+  state.teachers=dataOf(await api("/api/teachers"));
+  $("teacher-count").textContent=state.teachers.length;
+  $("teacher-table").replaceChildren();
+  if(!state.teachers.length)return emptyRow("teacher-table",6);
+  state.teachers.forEach(t=>addRow("teacher-table",[t.staff_id,`${t.first_name||""} ${t.last_name||""}`.trim(),t.phone,t.email,t.subject,t.qualification]));
+}
+$("teacher-form").addEventListener("submit",async event=>{
+  event.preventDefault();
+  try {
+    const body=Object.fromEntries(new FormData(event.currentTarget));
+    const result=await api("/api/teachers",{method:"POST",body:JSON.stringify(body)});
+    notify("teacher-message",result.message||"Teacher saved successfully.");
+    event.currentTarget.reset();
+    await loadTeachers();
+  } catch(error) {notify("teacher-message",error.message,true);}
+});
+
+async function loadClasses() {
+  const result=await api("/api/classes");
+  state.classes=dataOf(result);
+  $("class-table").replaceChildren();
+  if(!state.classes.length)return emptyRow("class-table",2);
+  state.classes.forEach(item=>addRow("class-table",[item.class_name||item.name||item, item.description||""]));
+}
+async function loadSubjects() {
+  state.subjects=dataOf(await api("/api/subjects"));
+  $("subject-count").textContent=state.subjects.length;
+  $("subject-table").replaceChildren();
+  if(!state.subjects.length)emptyRow("subject-table",3);
+  else state.subjects.forEach(s=>addRow("subject-table",[s.subject_name,s.subject_code,s.description]));
+  fillExamChoices();
+}
+$("subject-form").addEventListener("submit",async event=>{
+  event.preventDefault();
+  try {
+    const body=Object.fromEntries(new FormData(event.currentTarget));
+    const result=await api("/api/subjects",{method:"POST",body:JSON.stringify(body)});
+    notify("subject-message",result.message||"Subject saved successfully.");
+    event.currentTarget.reset();
+    await loadSubjects();
+  } catch(error) {notify("subject-message",error.message,true);}
+});
+
+async function loadAttendance() {
+  const result=await api("/api/attendance");
+  state.attendance=dataOf(result);
+  $("attendance-table").replaceChildren();
+  if(!state.attendance.length)return emptyRow("attendance-table",4);
+  state.attendance.forEach(a=>addRow("attendance-table",[
+    a.student_name||[a.first_name,a.last_name].filter(Boolean).join(" ")||a.student_id,
+    a.class_name,a.attendance_date||a.date,a.status
+  ]));
+}
+
+function fillExamChoices() {
+  if(!$("exam-student"))return;
+  const studentSelect=$("exam-student"),subjectSelect=$("exam-subject");
+  const oldStudent=studentSelect.value,oldSubject=subjectSelect.value;
+  studentSelect.replaceChildren(new Option("Select student",""));
+  state.students.forEach(s=>studentSelect.add(new Option(`${s.student_id} — ${s.first_name} ${s.last_name}`,s.id)));
+  subjectSelect.replaceChildren(new Option("Select subject",""));
+  state.subjects.forEach(s=>subjectSelect.add(new Option(`${s.subject_name}${s.subject_code?" ("+s.subject_code+")":""}`,s.id)));
+  if(state.students.some(s=>String(s.id)===oldStudent))studentSelect.value=oldStudent;
+  if(state.subjects.some(s=>String(s.id)===oldSubject))subjectSelect.value=oldSubject;
+  setExamClass();
+}
+function setExamClass() {
+  const student=state.students.find(s=>String(s.id)===$("exam-student").value);
+  $("exam-class").value=student?.class_name||"";
+}
+$("exam-student").addEventListener("change",setExamClass);
+function updateExamPreview() {
+  const a=$("class-score").value,b=$("exam-score").value;
+  if(a===""||b===""){$("exam-total").value="0";$("exam-grade").value="—";return;}
+  const c=Number(a),d=Number(b);
+  if(!Number.isFinite(c)||!Number.isFinite(d)||c<0||c>30||d<0||d>70){$("exam-total").value="Invalid";$("exam-grade").value="—";return;}
+  const total=c+d;
+  $("exam-total").value=total.toFixed(2);
+  $("exam-grade").value=grade(total);
+}
+$("class-score").addEventListener("input",updateExamPreview);
+$("exam-score").addEventListener("input",updateExamPreview);
+
+async function loadExaminations() {
+  state.examinations=dataOf(await api("/api/examinations"));
+  $("exam-count").textContent=state.examinations.length;
+  renderExaminations();
+}
+function renderExaminations() {
+  const q=$("exam-search").value.trim().toLowerCase();
+  const rows=state.examinations.filter(e=>[
+    e.student_number,e.first_name,e.last_name,e.subject_name,e.class_name,e.exam_name,e.academic_year,e.term,e.grade
+  ].join(" ").toLowerCase().includes(q));
+  $("exam-table").replaceChildren();
+  if(!rows.length)return emptyRow("exam-table",11);
+  rows.forEach(e=>addRow("exam-table",[
+    e.student_number||"",`${e.first_name||""} ${e.last_name||""}`.trim(),
+    e.class_name,e.subject_name,e.exam_name,e.academic_year,e.term,
+    e.class_score,e.exam_score,e.total_score,e.grade
+  ]));
+}
+$("exam-search").addEventListener("input",renderExaminations);
+$("exam-form").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const button=event.submitter;
+  if(button)button.disabled=true;
+  try {
+    const body=Object.fromEntries(new FormData(event.currentTarget));
+    body.student_id=Number(body.student_id);
+    body.subject_id=Number(body.subject_id);
+    body.class_score=Number(body.class_score);
+    body.exam_score=Number(body.exam_score);
+    const result=await api("/api/examinations",{method:"POST",body:JSON.stringify(body)});
+    notify("exam-message",result.message||"Examination result saved successfully.");
+    event.currentTarget.reset();
+    $("exam-class").value="";
+    updateExamPreview();
+    await loadExaminations();
+  } catch(error) {notify("exam-message",error.message,true);}
+  finally {if(button)button.disabled=false;}
+});
+$("exam-form").addEventListener("reset",()=>setTimeout(()=>{ $("exam-class").value="";updateExamPreview();},0));
+
+const loaders={
+  dashboard:async()=>{
+    try {
+      await Promise.allSettled([loadStudents(),loadTeachers(),loadSubjects(),loadExaminations()]);
+      notify("dashboard-message","Dashboard data refreshed.");
+    } catch(error) {notify("dashboard-message",error.message,true);}
+  },
+  students:loadStudents,
+  teachers:loadTeachers,
+  classes:loadClasses,
+  subjects:loadSubjects,
+  attendance:loadAttendance,
+  examinations:async()=>{await Promise.all([loadStudents(),loadSubjects(),loadExaminations()]);},
+  fees:async()=>{},
+  reports:async()=>{},
+  settings:async()=>{}
+};
+async function loadPage(page) {
+  try { await (loaders[page]||async()=>{})(); }
+  catch(error) {
+    const messageId=({students:"student-message",teachers:"teacher-message",classes:"class-message",subjects:"subject-message",attendance:"attendance-message",examinations:"exam-message"})[page];
+    if(messageId)notify(messageId,error.message,true);
+    console.error(`Could not load ${page}:`,error);
+  }
+}
+$("refresh-button").addEventListener("click",()=>loadPage(location.hash.slice(1)||"dashboard"));
+
+const initial=location.hash.slice(1);
+showPage(["dashboard","students","teachers","classes","subjects","attendance","examinations","fees","reports","settings"].includes(initial)?initial:"dashboard");
+</script>
+</body>
+</html>

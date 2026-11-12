@@ -1,0 +1,4 @@
+The original route source files were not present in the recovered file archive.
+The recovered server.js imports: students, teachers, classes, subjects, attendance, examinations.
+Do not create empty route files: the server will not start until the matching route implementations
+are restored. Authentication route/middleware files were also not recovered as complete files.

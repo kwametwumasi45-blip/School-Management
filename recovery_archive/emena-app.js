@@ -1,0 +1,662 @@
+
+(() => {
+  "use strict";
+
+  const API = {
+    students: "/api/students",
+    teachers: "/api/teachers",
+    classes: "/api/classes",
+    subjects: "/api/subjects",
+    attendance: "/api/attendance",
+    examinations: "/api/examinations",
+    fees: "/api/fees",
+    reports: "/api/reports",
+    settings: "/api/settings"
+  };
+
+  const labels = {
+    students: ["Students", "Register and manage student records."],
+    teachers: ["Teachers & Staff", "Teaching and staff records."],
+    classes: ["Classes", "Class records."],
+    subjects: ["Subjects", "Subject records."],
+    attendance: ["Attendance", "Attendance records."],
+    examinations: ["Examinations", "Examination records and results."],
+    fees: ["Fees & Payments", "Fee assignments and payment records."],
+    reports: ["Reports", "School reports and summaries."],
+    settings: ["Settings", "School information and preferences."]
+  };
+
+  const $ = id => document.getElementById(id);
+
+  let currentPage = "dashboard";
+  let lastRows = [];
+  let editingStudentId = null;
+  let editingTeacherId = null;
+
+  function setMessage(message, type = "") {
+    const box = $("module-message");
+    box.textContent = message;
+    box.className = "message" + (type ? " " + type : "");
+  }
+
+  async function apiRequest(url, method = "GET", data = null) {
+    const options = {
+      method,
+      credentials: "same-origin",
+      headers: { "Accept": "application/json" }
+    };
+
+    if (data !== null) {
+      options.headers["Content-Type"] = "application/json";
+      options.body = JSON.stringify(data);
+    }
+
+    const response = await fetch(url, options);
+
+    if (response.status === 401) {
+      window.location.href = "/login";
+      throw new Error("Your session has expired. Please log in again.");
+    }
+
+    const text = await response.text();
+    let payload = {};
+
+    try {
+      payload = text ? JSON.parse(text) : {};
+    } catch {
+      throw new Error("The server returned an invalid response.");
+    }
+
+    if (!response.ok || payload.success === false) {
+      throw new Error(
+        payload.message || payload.error || `Request failed (${response.status}).`
+      );
+    }
+
+    return payload;
+  }
+
+  function extractRows(payload) {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload.data)) return payload.data;
+    if (Array.isArray(payload.results)) return payload.results;
+    if (Array.isArray(payload.records)) return payload.records;
+    if (payload.data && typeof payload.data === "object") {
+      return [payload.data];
+    }
+    return [];
+  }
+
+  // Create the student registration form.
+  function createStudentForm() {
+    const panel = document.createElement("div");
+    panel.className = "content-card";
+    panel.id = "student-form-panel";
+    panel.hidden = true;
+    panel.style.marginBottom = "20px";
+
+    panel.innerHTML = `
+      <div class="section-heading">
+        <div>
+          <h2 id="student-form-title">Register New Student</h2>
+          <p>Enter the student's information below.</p>
+        </div>
+      </div>
+
+      <form id="student-form">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;">
+
+          <label>
+            Student ID *
+            <input name="student_id" type="text" required maxlength="150"
+              placeholder="Example: EMS001">
+          </label>
+
+          <label>
+            First Name *
+            <input name="first_name" type="text" required maxlength="150"
+              placeholder="Enter first name">
+          </label>
+
+          <label>
+            Last Name *
+            <input name="last_name" type="text" required maxlength="150"
+              placeholder="Enter last name">
+          </label>
+
+          <label>
+            Gender *
+            <select name="gender" required>
+              <option value="">Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+
+          <label>
+            Date of Birth
+            <input name="date_of_birth" type="date">
+          </label>
+
+          <label>
+            Class *
+            <input name="class_name" type="text" required maxlength="150"
+              placeholder="Example: Basic 6">
+          </label>
+
+          <label>
+            Parent/Guardian Name *
+            <input name="guardian_name" type="text" required maxlength="150"
+              placeholder="Enter parent or guardian name">
+          </label>
+
+          <label>
+            Parent/Guardian Phone *
+            <input name="guardian_phone" type="tel" required maxlength="150"
+              placeholder="Enter phone number">
+          </label>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+          <button type="submit" class="button" id="student-save-button">
+            Save Student
+          </button>
+          <button type="button" class="button secondary"
+            id="student-cancel-button" hidden>
+            Cancel Edit
+          </button>
+        </div>
+      </form>
+    `;
+
+    const moduleCard = $("module-page").querySelector(".content-card");
+    moduleCard.insertBefore(panel, $("module-message"));
+
+    $("student-form").addEventListener("submit", saveStudent);
+
+    $("student-cancel-button").addEventListener("click", () => {
+      resetStudentForm();
+    });
+  }
+
+  function resetStudentForm() {
+    $("student-form").reset();
+    editingStudentId = null;
+    $("student-form-title").textContent = "Register New Student";
+    $("student-save-button").textContent = "Save Student";
+    $("student-cancel-button").hidden = true;
+  }
+
+  async function saveStudent(event) {
+    event.preventDefault();
+
+    const form = $("student-form");
+    const formData = new FormData(form);
+    const student = {};
+
+    [
+      "student_id",
+      "first_name",
+      "last_name",
+      "gender",
+      "date_of_birth",
+      "class_name",
+      "guardian_name",
+      "guardian_phone"
+    ].forEach(field => {
+      student[field] = String(formData.get(field) || "").trim();
+    });
+
+    const wasEditing = editingStudentId !== null;
+    const button = $("student-save-button");
+    button.disabled = true;
+    button.textContent = "Saving...";
+
+    try {
+      if (editingStudentId !== null) {
+        await apiRequest(
+          `${API.students}/${editingStudentId}`,
+          "PUT",
+          student
+        );
+
+        setMessage("Student record updated successfully.", "success");
+      } else {
+        await apiRequest(API.students, "POST", student);
+
+        setMessage("Student registered successfully.", "success");
+      }
+
+      resetStudentForm();
+      await loadModule("students");
+      setMessage(
+        wasEditing ? "Student record updated successfully." : "Student registered successfully.",
+        "success"
+      );
+
+    } catch (error) {
+      setMessage(error.message || "Could not save student.", "error");
+    } finally {
+      button.disabled = false;
+
+      if (editingStudentId === null) {
+        button.textContent = "Save Student";
+      }
+    }
+  }
+
+  function editStudent(id) {
+    const student = lastRows.find(row => String(row.id) === String(id));
+
+    if (!student) {
+      setMessage("Student record could not be found.", "error");
+      return;
+    }
+
+    editingStudentId = student.id;
+
+    const form = $("student-form");
+
+    Object.keys(student).forEach(key => {
+      const input = form.elements.namedItem(key);
+
+      if (input) {
+        input.value = student[key] ?? "";
+      }
+    });
+
+    $("student-form-title").textContent = "Edit Student Record";
+    $("student-save-button").textContent = "Update Student";
+    $("student-cancel-button").hidden = false;
+
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function deleteStudent(id) {
+    const student = lastRows.find(row => String(row.id) === String(id));
+
+    if (!student) return;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${student.first_name} ${student.last_name}?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await apiRequest(`${API.students}/${id}`, "DELETE");
+      setMessage("Student record deleted successfully.", "success");
+      await loadModule("students");
+    } catch (error) {
+      setMessage(error.message || "Could not delete student.", "error");
+    }
+  }
+
+
+  // Create a separate teacher and staff registration form.
+  function createTeacherForm() {
+    const panel = document.createElement("div");
+    panel.className = "content-card";
+    panel.id = "teacher-form-panel";
+    panel.hidden = true;
+    panel.style.marginBottom = "20px";
+
+    panel.innerHTML = `
+      <div class="section-heading">
+        <div>
+          <h2 id="teacher-form-title">Register New Teacher / Staff</h2>
+          <p>Enter the teacher or staff member's information below.</p>
+        </div>
+      </div>
+      <form id="teacher-form">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;">
+          <label>Staff ID *<input name="staff_id" required maxlength="150" placeholder="Example: EMS-T001"></label>
+          <label>First Name *<input name="first_name" required maxlength="150"></label>
+          <label>Last Name *<input name="last_name" required maxlength="150"></label>
+          <label>Gender *
+            <select name="gender" required>
+              <option value="">Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label>Phone Number *<input name="phone" type="tel" required maxlength="150" placeholder="Enter phone number"></label>
+          <label>Email Address<input name="email" type="email" maxlength="150" placeholder="name@example.com"></label>
+          <label>Subject *<input name="subject" required maxlength="150" placeholder="Example: Mathematics"></label>
+          <label>Qualification<input name="qualification" maxlength="150" placeholder="Example: Diploma in Basic Education"></label>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+          <button type="submit" class="button" id="teacher-save-button">Save Teacher</button>
+          <button type="button" class="button secondary" id="teacher-cancel-button" hidden>Cancel Edit</button>
+        </div>
+      </form>
+    `;
+
+    const moduleCard = $("module-page").querySelector(".content-card");
+    moduleCard.insertBefore(panel, $("module-message"));
+    $("teacher-form").addEventListener("submit", saveTeacher);
+    $("teacher-cancel-button").addEventListener("click", resetTeacherForm);
+  }
+
+  function resetTeacherForm() {
+    $("teacher-form").reset();
+    editingTeacherId = null;
+    $("teacher-form-title").textContent = "Register New Teacher / Staff";
+    $("teacher-save-button").textContent = "Save Teacher";
+    $("teacher-cancel-button").hidden = true;
+  }
+
+  async function saveTeacher(event) {
+    event.preventDefault();
+    const form = $("teacher-form");
+    const formData = new FormData(form);
+    const teacher = {};
+    ["staff_id", "first_name", "last_name", "gender", "phone", "email", "subject", "qualification"]
+      .forEach(field => teacher[field] = String(formData.get(field) || "").trim());
+
+    const wasEditing = editingTeacherId !== null;
+    const button = $("teacher-save-button");
+    button.disabled = true;
+    button.textContent = "Saving...";
+
+    try {
+      if (wasEditing) {
+        await apiRequest(`${API.teachers}/${editingTeacherId}`, "PUT", teacher);
+      } else {
+        await apiRequest(API.teachers, "POST", teacher);
+      }
+      resetTeacherForm();
+      await loadModule("teachers");
+      setMessage(wasEditing ? "Teacher record updated successfully." : "Teacher registered successfully.", "success");
+    } catch (error) {
+      setMessage(error.message || "Could not save teacher.", "error");
+    } finally {
+      button.disabled = false;
+      if (editingTeacherId === null) button.textContent = "Save Teacher";
+    }
+  }
+
+  function editTeacher(id) {
+    const teacher = lastRows.find(row => String(row.id) === String(id));
+    if (!teacher) {
+      setMessage("Teacher record could not be found.", "error");
+      return;
+    }
+    editingTeacherId = teacher.id;
+    const form = $("teacher-form");
+    Object.keys(teacher).forEach(key => {
+      const input = form.elements.namedItem(key);
+      if (input) input.value = teacher[key] ?? "";
+    });
+    $("teacher-form-title").textContent = "Edit Teacher / Staff Record";
+    $("teacher-save-button").textContent = "Update Teacher";
+    $("teacher-cancel-button").hidden = false;
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function deleteTeacher(id) {
+    const teacher = lastRows.find(row => String(row.id) === String(id));
+    if (!teacher) return;
+    if (!window.confirm(`Are you sure you want to delete ${teacher.first_name} ${teacher.last_name}?`)) return;
+    try {
+      await apiRequest(`${API.teachers}/${id}`, "DELETE");
+      await loadModule("teachers");
+      setMessage("Teacher record deleted successfully.", "success");
+    } catch (error) {
+      setMessage(error.message || "Could not delete teacher.", "error");
+    }
+  }
+
+  function renderTable(rows) {
+    const head = $("records-head");
+    const body = $("records-body");
+
+    head.replaceChildren();
+    body.replaceChildren();
+
+    lastRows = rows;
+
+    if (!rows.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+
+      td.className = "empty-cell";
+      td.textContent = currentPage === "teachers" ? "No teacher records found. Register a teacher above." : currentPage === "students" ? "No student records found. Register a student above." : "No records found.";
+      tr.appendChild(td);
+      body.appendChild(tr);
+
+      $("record-count").textContent = "0 records";
+      return;
+    }
+
+    const keys = [
+      ...new Set(rows.flatMap(row => Object.keys(row || {})))
+    ];
+
+    const headerRow = document.createElement("tr");
+
+    keys.forEach(key => {
+      const th = document.createElement("th");
+      th.textContent = key.replaceAll("_", " ");
+      headerRow.appendChild(th);
+    });
+
+    if (currentPage === "students" || currentPage === "teachers") {
+      const th = document.createElement("th");
+      th.textContent = "Actions";
+      headerRow.appendChild(th);
+    }
+
+    head.appendChild(headerRow);
+
+    rows.forEach(row => {
+      const tr = document.createElement("tr");
+
+      keys.forEach(key => {
+        const td = document.createElement("td");
+        const value = row?.[key];
+
+        td.textContent =
+          value === null || value === undefined
+            ? "—"
+            : typeof value === "object"
+              ? JSON.stringify(value)
+              : String(value);
+
+        tr.appendChild(td);
+      });
+
+      if (currentPage === "students" || currentPage === "teachers") {
+        const td = document.createElement("td");
+
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.textContent = "Edit";
+        editButton.className = "button secondary";
+        editButton.dataset.recordAction = "edit";
+        editButton.dataset.recordType = currentPage;
+        editButton.dataset.id = row.id;
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.textContent = "Delete";
+        deleteButton.className = "button";
+        deleteButton.style.marginLeft = "6px";
+        deleteButton.dataset.recordAction = "delete";
+        deleteButton.dataset.recordType = currentPage;
+        deleteButton.dataset.id = row.id;
+
+        td.append(editButton, deleteButton);
+        tr.appendChild(td);
+      }
+
+      body.appendChild(tr);
+    });
+
+    $("record-count").textContent =
+      `${rows.length} record${rows.length === 1 ? "" : "s"}`;
+  }
+
+  async function loadModule(page) {
+    currentPage = page;
+
+    const [heading, description] = labels[page];
+
+    $("page-title").textContent = heading;
+    $("module-heading").textContent = heading;
+    $("module-description").textContent = description;
+
+    setMessage("Loading records...");
+
+    try {
+      const payload = await apiRequest(API[page]);
+      const rows = extractRows(payload);
+
+      renderTable(rows);
+
+      setMessage(
+        rows.length
+          ? "Records loaded successfully."
+          : "The connection is working, but there are no records yet.",
+        "success"
+      );
+    } catch (error) {
+      renderTable([]);
+      setMessage(error.message || "Could not load this module.", "error");
+    }
+  }
+
+  function showPage(page) {
+    document.querySelectorAll(".nav-link").forEach(button => {
+      button.classList.toggle("active", button.dataset.page === page);
+    });
+
+    if (page === "dashboard") {
+      currentPage = "dashboard";
+      $("page-title").textContent = "Dashboard";
+      $("dashboard-page").hidden = false;
+      $("dashboard-page").classList.add("active");
+      $("module-page").hidden = true;
+      loadDashboardStats();
+    } else if (labels[page]) {
+      $("dashboard-page").hidden = true;
+      $("dashboard-page").classList.remove("active");
+      $("module-page").hidden = false;
+      $("module-page").classList.add("active");
+
+      $("student-form-panel").hidden = page !== "students";
+      $("teacher-form-panel").hidden = page !== "teachers";
+
+      if (page === "students") resetStudentForm();
+      if (page === "teachers") resetTeacherForm();
+
+      loadModule(page);
+    }
+
+    $("sidebar").classList.remove("open");
+  }
+
+  async function loadDashboardStats() {
+    const ids = {
+      students: "stat-students",
+      teachers: "stat-teachers",
+      classes: "stat-classes",
+      subjects: "stat-subjects"
+    };
+
+    for (const [module, id] of Object.entries(ids)) {
+      try {
+        const payload = await apiRequest(API[module]);
+        $(id).textContent = extractRows(payload).length;
+      } catch {
+        $(id).textContent = "—";
+      }
+    }
+  }
+
+  // Edit and delete actions for student and teacher records.
+  document.addEventListener("click", event => {
+    const actionButton = event.target.closest("[data-record-action]");
+    if (!actionButton) return;
+
+    const id = actionButton.dataset.id;
+    const type = actionButton.dataset.recordType;
+    const action = actionButton.dataset.recordAction;
+
+    if (type === "students" && action === "edit") editStudent(id);
+    if (type === "students" && action === "delete") deleteStudent(id);
+    if (type === "teachers" && action === "edit") editTeacher(id);
+    if (type === "teachers" && action === "delete") deleteTeacher(id);
+  });
+
+  document.addEventListener("click", event => {
+    const actionButton = event.target.closest("[data-student-action]");
+
+    if (!actionButton) return;
+
+    const id = actionButton.dataset.id;
+
+    if (actionButton.dataset.studentAction === "edit") {
+      editStudent(id);
+    }
+
+    if (actionButton.dataset.studentAction === "delete") {
+      deleteStudent(id);
+    }
+  });
+
+  document.addEventListener("click", event => {
+    const button = event.target.closest("[data-page]");
+
+    if (button) {
+      showPage(button.dataset.page);
+    }
+  });
+
+  $("refresh-button").addEventListener("click", () => {
+    if (currentPage !== "dashboard" && API[currentPage]) {
+      loadModule(currentPage);
+    }
+  });
+
+  $("menu-toggle").addEventListener("click", () => {
+    $("sidebar").classList.toggle("open");
+  });
+
+  $("logout-button").addEventListener("click", async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "same-origin"
+      });
+
+      if (response.ok) {
+        window.location.href = "/login";
+      } else {
+        setMessage("Could not log out. Please try again.", "error");
+      }
+    } catch {
+      setMessage("Could not contact the server to log out.", "error");
+    }
+  });
+
+  $("today-label").textContent = new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  }).format(new Date());
+
+  createStudentForm();
+  createTeacherForm();
+
+  // Confirm login before displaying protected dashboard content.
+  apiRequest("/api/auth/me")
+    .then(() => showPage("dashboard"))
+    .catch(() => {
+      window.location.href = "/login";
+    });
+
+})();
